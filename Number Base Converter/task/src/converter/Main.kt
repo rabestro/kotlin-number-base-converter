@@ -1,30 +1,30 @@
 package converter
 
 fun main() {
+    menu1()
+}
+
+fun menu1() {
     while (true) {
-        println("Do you want to convert /from decimal or /to decimal? (To quit type /exit)")
-        when (readLine()!!){
-            "/from" -> from()
-            "/to" -> to()
-            "/exit"-> break
+        println("Enter two numbers in format: {source base} {target base} (To quit type /exit)")
+        val data = readLine()!!
+        if (data == "/exit") {
+            return
         }
+        val (sourceBase, targetBase) = data.split(' ').map(String::toInt)
+        menu2(sourceBase, targetBase)
     }
 }
 
-fun from() {
-    println("Enter number in decimal system:")
-    val number = readLine()!!.toLong()
-    println("Enter target base:")
-    val radix = readLine()!!.toInt()
-    val result = number.toString(radix)
-    println("Conversion result: $result")
-}
-
-fun to() {
-    println("Enter source number:")
-    val number = readLine()!!
-    println("Enter source base:")
-    val radix = readLine()!!.toInt()
-    val result = number.toLong(radix)
-    println("Conversion to decimal result: $result")
+fun menu2(sourceBase: Int, targetBase: Int) {
+    while (true) {
+        println("Enter number in base $sourceBase to convert to base $targetBase (To go back type /back)")
+        val data = readLine()!!
+        if (data == "/back") {
+            return
+        }
+        val number = data.toBigInteger(sourceBase)
+        val result = number.toString(targetBase)
+        println("Conversion result: $result")
+    }
 }
