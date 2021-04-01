@@ -7,24 +7,20 @@ fun main() {
 fun menu1() {
     while (true) {
         println("Enter two numbers in format: {source base} {target base} (To quit type /exit)")
-        val data = readLine()!!
-        if (data == "/exit") {
-            return
+        when (val data = readLine()!!) {
+            "/exit" -> return
+            else -> menu2(data)
         }
-        val (sourceBase, targetBase) = data.split(' ').map(String::toInt)
-        menu2(sourceBase, targetBase)
     }
 }
 
-fun menu2(sourceBase: Int, targetBase: Int) {
+fun menu2(data: String) {
+    val (sourceBase, targetBase) = data.split(' ').map(String::toInt)
     while (true) {
         println("Enter number in base $sourceBase to convert to base $targetBase (To go back type /back)")
-        val data = readLine()!!
-        if (data == "/back") {
-            return
+        when (val number = readLine()!!) {
+            "/back" -> return
+            else -> println("Conversion result: ${number.toBigInteger(sourceBase).toString(targetBase)}")
         }
-        val number = data.toBigInteger(sourceBase)
-        val result = number.toString(targetBase)
-        println("Conversion result: $result")
     }
 }
