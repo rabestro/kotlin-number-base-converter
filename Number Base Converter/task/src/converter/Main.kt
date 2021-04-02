@@ -39,7 +39,7 @@ fun convert(sourceBase: Int, targetBase: Int, number: String) {
             decimalFraction += digits.indexOf(it) / divider
             divider *= sourceBase
         }
-        var targetFraction = "";
+        var targetFraction = ""
         repeat(5) {
             decimalFraction *= targetBase
             val index = decimalFraction.toInt()
