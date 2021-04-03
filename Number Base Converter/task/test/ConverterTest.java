@@ -7,9 +7,16 @@ import org.hyperskill.hstest.testing.TestedProgram;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ConverterTest extends StageTest {
+    private static final Random random = new Random();
+    private static final int MAX_WHOLE_LENGTH = 20;
+    private static final int MAX_FRACTION_LENGTH = 10;
+    private static final String DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
     private static final Pattern RESULT_PATTERN = Pattern.compile(
             "Conversion result:\\s*(?<number>.*?)\\s*", Pattern.CASE_INSENSITIVE);
 
@@ -28,7 +35,7 @@ public class ConverterTest extends StageTest {
         return CheckResult.correct();
     }
 
-    class TestCase {
+    static class TestCase {
         final int sourceBase;
         final int targetBase;
         final List<String[]> cases;
@@ -42,7 +49,8 @@ public class ConverterTest extends StageTest {
 
     private final TestCase[] testCases = new TestCase[]{
             new TestCase(10, 2, new String[][]{
-                    {"12345", "11000000111001"}})
+                    {"12345", "11000000111001"}
+            })
 
     };
 
@@ -55,7 +63,7 @@ public class ConverterTest extends StageTest {
         main.start();
         var output = main.execute(sourceBase + " " + targetBase).toLowerCase();
 
-        for (var data: test.cases) {
+        for (var data : test.cases) {
             require(output.contains("base " + sourceBase)
                     && output.contains("convert to base " + targetBase), "" +
                     "Your program should prompt the user for the number to be " +
@@ -105,12 +113,39 @@ public class ConverterTest extends StageTest {
                     "until the user enters \"/back\"");
         }
 
-        main.execute("/back");
+        require(main.execute("/back").toLowerCase().contains("/exit"), "" +
+                "Your program should take the user back to the top-level " +
+                "menu when they enter \"/back\"");
+
         main.execute("/exit");
         require(main.isFinished(), "Your program should terminate when the user enters \"/exit\"");
         return CheckResult.correct();
     }
 
+    CheckResult testConversion(int sourceBase, int targetBase) {
+
+        return CheckResult.correct();
+    }
+
+    private static String generateSourceNumber(final int radix) {
+        final var sourceWhole = random
+                .ints(random.nextLong() % MAX_WHOLE_LENGTH, 0, radix)
+                .map(DIGITS::charAt)
+                .mapToObj(Character::toString)
+                .collect(Collectors.joining());
+
+        if (random.nextBoolean()) {
+            return sourceWhole;
+        }
+
+        final var sourceFraction = random
+                .ints(random.nextLong() % MAX_FRACTION_LENGTH, 0, radix)
+                .map(DIGITS::charAt)
+                .mapToObj(Character::toString)
+                .collect(Collectors.joining());
+
+        return sourceWhole + '.' + sourceFraction;
+    }
 
     private static void require(final boolean condition, final String error, final Object... args) {
         if (!condition) {
