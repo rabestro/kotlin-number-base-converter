@@ -1,53 +1,45 @@
 package converter
 
 fun main() {
-    menu1()
-}
-
-fun menu1() {
     while (true) {
         println("Enter two numbers in format: {source base} {target base} (To quit type /exit)")
-        when (val base = readLine()!!) {
+        when (val userInput = readLine()!!) {
             "/exit" -> return
-            else -> menu2(base)
+            else -> convert(userInput)
         }
     }
 }
 
-fun menu2(base: String) {
-    val (sourceBase, targetBase) = base.split(' ').map(String::toInt)
+fun convert(fromToBase: String) {
+    val (sourceBase, targetBase) = fromToBase.split(' ').map(String::toInt)
     while (true) {
         println("Enter number in base $sourceBase to convert to base $targetBase (To go back type /back)")
         when (val number = readLine()!!) {
             "/back" -> return
-            else -> convert(sourceBase, targetBase, number)
+            else -> println("Conversion result: " + number.fromToRadix(sourceBase, targetBase))
         }
     }
 }
 
-fun convert(sourceBase: Int, targetBase: Int, number: String) {
+fun String.fromToRadix(sourceBase: Int, targetBase: Int): String {
     val digits = "0123456789abcdefghijklmnopqrstuvwxyz"
-
-    print("Conversion result: ")
-
-    if (number.contains('.')) {
-        val (sourceWhole, sourceFraction) = number.split('.')
-        val targetWhole = sourceWhole.toBigInteger(sourceBase).toString(targetBase)
-        var decimalFraction = 0.0
-        var divider = sourceBase.toDouble()
-        sourceFraction.forEach {
-            decimalFraction += digits.indexOf(it) / divider
-            divider *= sourceBase
-        }
-        var targetFraction = ""
-        repeat(5) {
-            decimalFraction *= targetBase
-            val index = decimalFraction.toInt()
-            targetFraction += digits[index]
-            decimalFraction -= index
-        }
-        println("$targetWhole.$targetFraction")
-    } else {
-        println(number.toBigInteger(sourceBase).toString(targetBase))
+    if (!this.contains('.')) {
+        return this.toBigInteger(sourceBase).toString(targetBase)
     }
+    val (sourceWhole, sourceFraction) = this.split('.')
+    val targetWhole = sourceWhole.toBigInteger(sourceBase).toString(targetBase)
+    var decimalFraction = 0.0
+    var divider = sourceBase.toDouble()
+    sourceFraction.forEach {
+        decimalFraction += digits.indexOf(it) / divider
+        divider *= sourceBase
+    }
+    var targetFraction = ""
+    repeat(5) {
+        decimalFraction *= targetBase
+        val index = decimalFraction.toInt()
+        targetFraction += digits[index]
+        decimalFraction -= index
+    }
+    return "$targetWhole.$targetFraction"
 }
