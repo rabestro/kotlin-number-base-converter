@@ -4,18 +4,19 @@ import org.hyperskill.hstest.stage.StageTest;
 import org.hyperskill.hstest.testcase.CheckResult;
 import org.hyperskill.hstest.testing.TestedProgram;
 
+import java.math.BigInteger;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ConverterTest extends StageTest {
     private static final Random random = new Random();
-    private static final int MAX_WHOLE_LENGTH = 20;
-    private static final int MAX_FRACTION_LENGTH = 10;
+    private static final int MAX_SOURCE_WHOLE_LENGTH = 20;
+    private static final int MAX_SOURCE_FRACTION_LENGTH = 10;
+    private static final int MAX_TARGET_FRACTION_LENGTH = 5;
     private static final String DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
     private static final Pattern RESULT_PATTERN = Pattern.compile(
             "Conversion result:\\s*(?<number>.*?)\\s*", Pattern.CASE_INSENSITIVE);
@@ -129,7 +130,7 @@ public class ConverterTest extends StageTest {
 
     private static String generateSourceNumber(final int radix) {
         final var sourceWhole = random
-                .ints(random.nextLong() % MAX_WHOLE_LENGTH, 0, radix)
+                .ints(random.nextLong() % MAX_SOURCE_WHOLE_LENGTH, 0, radix)
                 .map(DIGITS::charAt)
                 .mapToObj(Character::toString)
                 .collect(Collectors.joining());
@@ -139,12 +140,36 @@ public class ConverterTest extends StageTest {
         }
 
         final var sourceFraction = random
-                .ints(random.nextLong() % MAX_FRACTION_LENGTH, 0, radix)
+                .ints(random.nextLong() % MAX_SOURCE_FRACTION_LENGTH, 0, radix)
                 .map(DIGITS::charAt)
                 .mapToObj(Character::toString)
                 .collect(Collectors.joining());
 
         return sourceWhole + '.' + sourceFraction;
+    }
+
+    private static String convert(String sourceNumber, int sourceBase, int targetBase) {
+        if (!sourceNumber.contains(".")) {
+            return new BigInteger(sourceNumber, sourceBase).toString(targetBase);
+        }
+        final var numberParts = sourceNumber.split(".");
+        final var targetWhole = new BigInteger(numberParts[0], sourceBase).toString(targetBase);
+        final var sourceFraction = numberParts[1].chars().map(DIGITS::indexOf).toArray();
+
+        var fraction = 0.0;
+        var divider = (double) sourceBase;
+        for (final int digit : sourceFraction) {
+            fraction += digit / divider;
+            divider *= sourceBase;
+        }
+        var targetFraction = "";
+        for (int i = 0; i < MAX_TARGET_FRACTION_LENGTH; ++i) {
+            fraction *= targetBase;
+            int index = (int) fraction;
+            targetFraction += DIGITS.charAt(index);
+            fraction -= index;
+        }
+        return targetWhole + '.' + targetFraction;
     }
 
     private static void require(final boolean condition, final String error, final Object... args) {
